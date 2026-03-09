@@ -1,5 +1,5 @@
 import { createConfig, http } from "wagmi";
-import { coinbaseWallet, injected, metaMask } from "@wagmi/connectors";
+import { injected } from "@wagmi/core";
 
 import { supportedChains } from "@/lib/chains";
 import { env } from "@/lib/env";
@@ -7,11 +7,7 @@ import { env } from "@/lib/env";
 export const wagmiConfig = createConfig({
   ssr: true,
   chains: supportedChains,
-  connectors: [
-    injected({ shimDisconnect: true }),
-    metaMask(),
-    coinbaseWallet({ appName: "VaultQuest" }),
-  ],
+  connectors: [injected({ shimDisconnect: true })],
   multiInjectedProviderDiscovery: true,
   transports: {
     1: http(env.rpcUrls.ethereum),
