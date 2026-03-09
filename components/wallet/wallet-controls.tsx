@@ -34,12 +34,8 @@ export function WalletControls() {
       connectors.filter(
         (
           connector,
-        ): connector is (typeof connectors)[number] & { id: string; name: string; type: string } =>
-          typeof connector !== "function" &&
-          "id" in connector &&
-          "name" in connector &&
-          "type" in connector &&
-          connector.type !== "safe",
+        ): connector is Exclude<(typeof connectors)[number], (...args: never[]) => unknown> =>
+          typeof connector !== "function" && connector.type !== "safe",
       ),
     [connectors],
   );
@@ -61,20 +57,26 @@ export function WalletControls() {
         </Button>
         <Modal open={open && !isConnected} onClose={() => setOpen(false)} title="Connect your wallet" subtitle="Use a supported wallet to access live YO deposit and redeem flows.">
           <div className="space-y-3">
+            {availableConnectors.length === 0 ? (
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
+                No wallet connector is available in this browser. Open the site in MetaMask, Coinbase Wallet, or a browser with an injected wallet extension.
+              </div>
+            ) : null}
             {availableConnectors.map((connector) => (
               <button
                 key={connector.id}
                 type="button"
                 onClick={() => connect({ connector })}
+                disabled={isPending}
                 className="flex w-full items-center justify-between rounded-3xl border border-white/10 bg-white/5 px-4 py-4 text-left text-white transition hover:border-white/20 hover:bg-white/8"
               >
                 <div>
                   <div className="font-medium">{connector.name}</div>
                   <div className="text-sm text-white/55">
-                    Browser wallet or injected provider
+                    {describeConnector(connector.id)}
                   </div>
                 </div>
-                {isPending ? (
+                {isPending && variables?.connector?.id === connector.id ? (
                   <span className="text-sm text-[#b9ffdf]">Connecting...</span>
                 ) : (
                   <ExternalLink className="h-4 w-4 text-white/45" />
@@ -121,4 +123,16 @@ export function WalletControls() {
       </Button>
     </div>
   );
+}
+
+function describeConnector(connectorId: string) {
+  if (connectorId === "metaMask") {
+    return "MetaMask extension or mobile wallet";
+  }
+
+  if (connectorId === "coinbaseWallet") {
+    return "Coinbase Wallet extension or mobile wallet";
+  }
+
+  return "Browser wallet or injected provider";
 }
