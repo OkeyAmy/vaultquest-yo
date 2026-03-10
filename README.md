@@ -291,7 +291,7 @@ This is intentionally compact. The app does not sprawl into many shallow routes.
 ```mermaid
 flowchart LR
   LP[Landing page /] --> DB[Dashboard /app]
-  DB --> VD[Vault detail /app/vault/[chainId]/[vaultId]]
+  DB --> VD["Vault detail /app/vault/s3/s4"]
   DB --> AC[Account center /app/account]
   VD --> TM[Shared transaction modal]
   DB --> TM
