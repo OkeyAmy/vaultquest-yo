@@ -14,11 +14,16 @@ export function SiteHeader({ showDashboardLink = true }: SiteHeaderProps) {
       <div className="page-shell flex flex-wrap items-center justify-between gap-3 py-3 sm:flex-nowrap sm:gap-4 sm:py-4">
         <Logo />
         <div className="flex w-full flex-wrap items-center justify-end gap-3 sm:w-auto sm:flex-nowrap">
-          {showDashboardLink ? (
-            <Link href="/app" className="hidden md:block">
-              <Button variant="ghost">Dashboard</Button>
+          <div className="hidden items-center gap-2 md:flex">
+            {showDashboardLink ? (
+              <Link href="/app">
+                <Button variant="ghost">Dashboard</Button>
+              </Link>
+            ) : null}
+            <Link href="/app/account">
+              <Button variant="ghost">Account</Button>
             </Link>
-          ) : null}
+          </div>
           <WalletControls />
         </div>
       </div>

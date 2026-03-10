@@ -21,7 +21,7 @@ const displayFont = Space_Grotesk({
 export const metadata: Metadata = {
   title: "VaultQuest | Smart DeFi savings with YO",
   description:
-    "VaultQuest is a trust-first DeFi savings account that connects wallets, loads live YO vaults, and handles real deposit and redeem flows across supported chains.",
+    "VaultQuest is a trust-first YO vault workspace that connects wallets, loads live vault analytics, and handles real deposit and redeem flows across supported chains.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

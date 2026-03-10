@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useVaults } from "@yo-protocol/react";
 
-import { useVaultCatalog } from "@/hooks/use-yo-data";
 import { flattenVaults } from "@/lib/yo/types";
 import { formatPercent, safeNumber } from "@/lib/utils";
 
 export function VaultPreviewStrip() {
-  const { data, isLoading, isError } = useVaultCatalog();
+  const { vaults, isLoading, isError } = useVaults();
 
-  const preview = flattenVaults(data ?? [])
+  const preview = flattenVaults(vaults ?? [])
     .sort((left, right) => safeNumber(right.yield["30d"]) - safeNumber(left.yield["30d"]))
     .slice(0, 3);
 
@@ -20,7 +20,7 @@ export function VaultPreviewStrip() {
           <div className="eyebrow">Live vault preview</div>
           <h2 className="section-title mt-3">YO inventory the judges can verify.</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">
-            Vault cards below come from the live YO catalog. Deposit and redeem actions stay inside the dashboard so the core path is short enough for a demo.
+            Vault cards below come from the live YO catalog. Deposit and redeem actions stay inside the dashboard so the core path stays short without falling back to placeholder product data.
           </p>
         </div>
         <Link href="/app" className="text-sm uppercase tracking-[0.2em] text-[#b9ffdf] transition hover:text-white">

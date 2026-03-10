@@ -28,12 +28,20 @@ export function isSupportedAppChain(chainId?: number): chainId is SupportedChain
   return Boolean(chainId && supportedChainIds.includes(chainId as SupportedChainId));
 }
 
-export function getChainLabel(chainId?: number) {
+export function getChainMeta(chainId?: number) {
   if (!chainId || !isSupportedAppChain(chainId)) {
-    return "Unsupported";
+    return {
+      label: `Chain ${chainId ?? "unknown"}`,
+      shortLabel: "Unknown",
+      blurb: "Chain metadata is not mapped in the app layer yet.",
+    };
   }
 
-  return chainMeta[chainId].label;
+  return chainMeta[chainId];
+}
+
+export function getChainLabel(chainId?: number) {
+  return getChainMeta(chainId).label;
 }
 
 export function getExplorerTxUrl(chainId: number | undefined, hash: string | undefined) {

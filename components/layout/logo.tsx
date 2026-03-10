@@ -9,7 +9,7 @@ export function Logo() {
       <span className="min-w-0">
         <span className="block truncate font-display text-lg tracking-wide text-white">VaultQuest</span>
         <span className="block truncate text-xs uppercase tracking-[0.24em] text-[#94cdb7]">
-          YO savings account
+          YO vault workspace
         </span>
       </span>
     </Link>

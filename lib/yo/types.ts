@@ -70,3 +70,7 @@ export function flattenVaults(vaults: VaultStatsItem[]) {
 
   return Array.from(new Map(venues.map((venue) => [venue.key, venue])).values());
 }
+
+export function getVaultRouteHref(venue: Pick<VaultVenue, "vaultId" | "chain">) {
+  return `/app/vault/${venue.chain.id}/${venue.vaultId}`;
+}

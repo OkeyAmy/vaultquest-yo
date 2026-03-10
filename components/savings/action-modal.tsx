@@ -1,7 +1,7 @@
 "use client";
 
-import type { SupportedChainId } from "@yo-protocol/core";
-import { useDeposit, useRedeem } from "@yo-protocol/react";
+import { YO_GATEWAY_ADDRESS, type SupportedChainId } from "@yo-protocol/core";
+import { useAllowance, useDeposit, usePreviewDeposit, useRedeem, useYieldConfig } from "@yo-protocol/react";
 import { AlertTriangle, CheckCircle2, ExternalLink, LoaderCircle, ShieldAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { formatUnits, parseUnits, type Address } from "viem";
@@ -9,7 +9,7 @@ import { useAccount, useChainId, useSwitchChain } from "wagmi";
 
 import {
   useChainTokenBalance,
-  useDepositPreview,
+  useVaultExecutionStatus,
   useWithdrawQuote,
 } from "@/hooks/use-yo-data";
 import { getExplorerTxUrl, isSupportedAppChain } from "@/lib/chains";
@@ -104,9 +104,25 @@ export function SavingsActionModal({
   const venueChainId = (venue?.chain.id ?? 8453) as SupportedChainId;
   const vaultAddress = venue?.contracts.vaultAddress as Address | undefined;
   const tokenAddress = venue?.asset.address as Address | undefined;
+  const { defaultSlippageBps } = useYieldConfig();
   const walletBalance = useChainTokenBalance(venueChainId, tokenAddress, address);
-  const depositPreview = useDepositPreview(venueChainId, vaultAddress, mode === "deposit" ? parsedAmount : undefined);
+  const depositPreview = usePreviewDeposit(
+    (vaultAddress ?? "0x0000000000000000000000000000000000000000") as Address,
+    mode === "deposit" ? parsedAmount : undefined,
+    {
+      enabled: Boolean(vaultAddress && mode === "deposit" && parsedAmount !== undefined),
+    },
+  );
   const redeemQuote = useWithdrawQuote(venueChainId, vaultAddress, mode === "redeem" ? parsedAmount : undefined);
+  const executionStatus = useVaultExecutionStatus(venueChainId, vaultAddress);
+  const allowance = useAllowance(
+    mode === "deposit" ? tokenAddress : vaultAddress,
+    YO_GATEWAY_ADDRESS,
+    address,
+    {
+      enabled: Boolean(address && (mode === "deposit" ? tokenAddress : vaultAddress)),
+    },
+  );
 
   const positionAssets = position?.position.assets ?? 0n;
   const positionShares = position?.position.shares ?? 0n;
@@ -145,6 +161,11 @@ export function SavingsActionModal({
 
     if (!parsedAmount) {
       setLocalError("Enter a valid amount.");
+      return;
+    }
+
+    if (executionStatus.data?.paused) {
+      setLocalError("This vault is currently paused and cannot accept a live transaction.");
       return;
     }
 
@@ -268,8 +289,8 @@ export function SavingsActionModal({
                 <PreviewRow
                   label={mode === "deposit" ? "Estimated shares" : "Estimated shares burned"}
                   value={
-                    parsedAmount && mode === "deposit" && depositPreview.data !== undefined
-                      ? `${formatTokenFromUnits(depositPreview.data, venue.shareAsset.decimals)} ${venue.shareAsset.symbol}`
+                    parsedAmount && mode === "deposit" && depositPreview.shares !== undefined
+                      ? `${formatTokenFromUnits(depositPreview.shares, venue.shareAsset.decimals)} ${venue.shareAsset.symbol}`
                       : parsedAmount && mode === "redeem" && redeemQuote.data !== undefined
                         ? `${formatTokenFromUnits(redeemQuote.data, venue.shareAsset.decimals)} ${venue.shareAsset.symbol}`
                         : "Enter an amount"
@@ -278,8 +299,47 @@ export function SavingsActionModal({
                 <PreviewRow label="Current chain" value={unsupportedChain ? "Unsupported" : String(chainId ?? "Not connected")} />
                 <PreviewRow label="Target chain" value={`${venue.chain.id} (${venue.chain.name})`} />
                 <PreviewRow label="Network handling" value={networkMismatch ? "Wallet switch required" : "Ready on current network"} />
+                <PreviewRow
+                  label={mode === "deposit" ? "Gateway allowance" : "Share allowance"}
+                  value={
+                    allowance.allowance
+                      ? `${formatTokenFromUnits(
+                          allowance.allowance.allowance,
+                          mode === "deposit" ? venue.asset.decimals : venue.shareAsset.decimals,
+                        )} ${mode === "deposit" ? venue.asset.symbol : venue.shareAsset.symbol}`
+                      : "Checking allowance"
+                  }
+                />
+                <PreviewRow label="Default slippage" value={`${(defaultSlippageBps / 100).toFixed(2)}%`} />
+                <PreviewRow
+                  label="Vault status"
+                  value={
+                    executionStatus.isLoading
+                      ? "Checking vault status"
+                      : executionStatus.data?.paused
+                        ? "Paused"
+                        : "Live"
+                  }
+                />
+                <PreviewRow
+                  label="Idle balance"
+                  value={
+                    executionStatus.data?.idleBalance !== undefined
+                      ? `${formatTokenFromUnits(executionStatus.data.idleBalance, venue.asset.decimals)} ${venue.asset.symbol}`
+                      : "Not returned"
+                  }
+                />
               </div>
             </div>
+
+            {executionStatus.data?.paused ? (
+              <div className="rounded-[24px] border border-[#ff8a7a]/20 bg-[#ff8a7a]/10 px-4 py-4 text-sm text-[#ffd2cc]">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>This vault is paused. VaultQuest is blocking execution until YO reports the route as live again.</span>
+                </div>
+              </div>
+            ) : null}
 
             {stepLabel ? (
               <div className="rounded-[24px] border border-[#b9ffdf]/18 bg-[#b9ffdf]/10 px-4 py-4 text-sm text-white">
@@ -330,7 +390,11 @@ export function SavingsActionModal({
               <Button variant="secondary" className="min-w-0 flex-1" onClick={onClose}>
                 Close
               </Button>
-              <Button className="min-w-0 flex-1" onClick={() => void handleSubmit()} disabled={isWorking || !venue || !isConnected}>
+              <Button
+                className="min-w-0 flex-1"
+                onClick={() => void handleSubmit()}
+                disabled={isWorking || !venue || !isConnected || Boolean(executionStatus.data?.paused)}
+              >
                 {mode === "deposit" ? "Submit deposit" : "Submit redeem"}
               </Button>
             </div>

@@ -9,26 +9,12 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { LiveHeroStats, SupportedChainsStrip } from "@/components/home/live-hero-panels";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { RiskPanel } from "@/components/savings/risk-panel";
 import { VaultPreviewStrip } from "@/components/savings/vault-preview-strip";
 import { Button } from "@/components/ui/button";
-
-const heroStats = [
-  {
-    value: "3",
-    label: "supported chains",
-  },
-  {
-    value: "Live",
-    label: "YO vault inventory",
-  },
-  {
-    value: "Explicit",
-    label: "wallet approval states",
-  },
-];
 
 const valueProps = [
   {
@@ -85,13 +71,14 @@ export default function HomePage() {
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[540px] bg-[radial-gradient(circle_at_12%_18%,rgba(118,228,188,0.2),transparent_32%),radial-gradient(circle_at_88%_12%,rgba(255,213,161,0.16),transparent_24%)]" />
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center">
             <div className="min-w-0 max-w-3xl">
-              <div className="eyebrow">YO SDK hackathon build</div>
+              <div className="eyebrow">YO live integration</div>
               <h1 className="mt-4 font-display text-4xl leading-[0.96] text-white sm:text-5xl lg:text-6xl">
                 Live DeFi savings with a wallet flow calm enough to trust.
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-white/68 sm:text-lg">
-                VaultQuest turns YO vault access into a consumer savings account surface: detected wallet connection,
-                clear network handling, and live deposit or redeem flows with risk messaging that never disappears.
+                VaultQuest turns YO vault access into a wallet-aware savings workspace: detected wallet connection,
+                clear network handling, live deposit or redeem flows, and account views for positions, pending redeems,
+                and rewards.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link href="/app">
@@ -107,18 +94,7 @@ export default function HomePage() {
                   </Button>
                 </a>
               </div>
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {heroStats.map((item, index) => (
-                  <div
-                    key={item.label}
-                    className="glass-panel panel-pad-compact animate-fade-up"
-                    style={{ animationDelay: `${index * 120}ms` }}
-                  >
-                    <div className="text-xs uppercase tracking-[0.22em] text-white/45">{item.label}</div>
-                    <div className="mt-3 font-display text-3xl text-white">{item.value}</div>
-                  </div>
-                ))}
-              </div>
+              <LiveHeroStats />
             </div>
             <div className="space-y-3">
               <div className="glass-panel panel-pad-compact relative overflow-hidden">
@@ -126,7 +102,7 @@ export default function HomePage() {
                 <div className="flex flex-wrap items-center justify-between gap-3 text-[#b9ffdf]">
                   <div className="flex items-center gap-3">
                     <Radar className="h-5 w-5" />
-                    <span className="eyebrow">Wallet-aware savings flow</span>
+                    <span className="eyebrow">Wallet-aware vault workflow</span>
                   </div>
                   <span className="rounded-full border border-[#b9ffdf]/20 bg-[#b9ffdf]/10 px-3 py-1 text-xs uppercase tracking-[0.22em] text-[#b9ffdf]">
                     live
@@ -138,14 +114,7 @@ export default function HomePage() {
                 <p className="mt-2 text-sm leading-6 text-white/65">
                   The product story stays tight: detect a browser wallet, inspect a real YO venue, then move through explicit approval and confirmation states without UI drift.
                 </p>
-                <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                  {["Base", "Ethereum", "Arbitrum"].map((chain) => (
-                    <div key={chain} className="rounded-[20px] border border-white/10 bg-[#081a15] px-3 py-3">
-                      <div className="text-xs uppercase tracking-[0.22em] text-[#94cdb7]">Supported</div>
-                      <div className="mt-1 font-display text-lg text-white">{chain}</div>
-                    </div>
-                  ))}
-                </div>
+                <SupportedChainsStrip />
                 <div className="mt-5 rounded-[24px] border border-white/10 bg-white/5 p-4">
                   <div className="text-xs uppercase tracking-[0.22em] text-white/45">Transaction states</div>
                   <div className="mt-3 flex flex-wrap gap-2">
